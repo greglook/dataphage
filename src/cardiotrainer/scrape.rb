@@ -1,9 +1,53 @@
+#!/usr/bin/env ruby
+
+# This script scrapes track data from CardioTrainer logs. The configuration file
+# should be a YAML document containing the app's access code, found in the
+# settings screen:
+#
+#     ---
+#     access_code: "ABCD1234"
+#
+
 require 'json'
 require 'mechanize'
+require 'optparse'
+require 'yaml'
 
 
 TRACKS_URL = "http://www.noom.com/cardiotrainer/tracks.php"
 
+
+
+##### CONFIGURATION #####
+
+$options = {
+  verbose: true,
+}
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: #{File.basename($0)} [options] <config>"
+  opts.separator ""
+  opts.separator "Options:"
+  opts.on('-h', '--help', "Display usage information") { print opts; exit }
+end.parse!
+
+def fail(msg, code=1)
+  STDERR.puts msg
+  exit code
+end
+
+def log(msg)
+  puts msg if $options[:verbose]
+end
+
+fail opts if ARGV.empty?
+
+$config = File.open(ARGV.first) {|file| YAML.load(file) }
+
+fail "No access code found in config file #{ARGV.first}" unless $config["access_code"]
+
+
+##### SCRAPING #####
 
 $agent = Mechanize.new do |agent|
   # TODO: randomize UA
@@ -37,5 +81,17 @@ def scrape_tracks(page)
 end
 
 
+# Track JSON data looks like this:
+# tracks = {"773581901" => {...}, "773209895" => {...}, ...}
+#
+# Keys in a track map:
+# ["trackIdSignature", "duration", "distance", "date", "minSpeed", "maxSpeed", "avgSpeed", "climb", "calories", "exercise_type", "track_name", "trackInterval"]
 
-# TODO: read config file, load tracks
+
+# TODO: implement
+# - look in output directory for marker file of last download
+# - log in, scrape tracks off page
+# - parse tracks, storing by unique id
+# - keep note of most recent track date
+# - continue loading tracks with offset until hitting date mark
+# - write new date mark (and associated unique id) to marker file
