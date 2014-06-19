@@ -21,15 +21,19 @@ TRACKS_URL = "http://www.noom.com/cardiotrainer/tracks.php"
 ##### CONFIGURATION #####
 
 $options = {
-  verbose: true,
+  verbose: false,
+  config_file: nil,
+  data_dir: nil,
 }
 
-OptionParser.new do |opts|
-  opts.banner = "Usage: #{File.basename($0)} [options] <config>"
+opts = OptionParser.new do |opts|
+  opts.banner = "Usage: #{File.basename($0)} [options] <config file> <data dir>"
   opts.separator ""
   opts.separator "Options:"
+  opts.on('-v', '--verbose', "Show extra process information") { $options[:verbose] = true }
   opts.on('-h', '--help', "Display usage information") { print opts; exit }
-end.parse!
+end
+opts.parse!
 
 def fail(msg, code=1)
   STDERR.puts msg
@@ -40,11 +44,16 @@ def log(msg)
   puts msg if $options[:verbose]
 end
 
-fail opts if ARGV.empty?
+fail opts if ARGV.count < 2
 
-$config = File.open(ARGV.first) {|file| YAML.load(file) }
+$options[:config_file] = ARGV.shift
+$options[:data_dir] = ARGV.shift
 
-fail "No access code found in config file #{ARGV.first}" unless $config["access_code"]
+fail opts unless ARGV.empty?
+
+$config = File.open($options[:config_file]) {|file| YAML.load(file) }
+fail "No access code found in config file #{$options[:config_file]}" unless $config["access_code"]
+
 
 
 ##### SCRAPING #####
@@ -81,17 +90,43 @@ def scrape_tracks(page)
 end
 
 
+
+##### PROCESSING #####
+
 # Track JSON data looks like this:
 # tracks = {"773581901" => {...}, "773209895" => {...}, ...}
 #
 # Keys in a track map:
 # ["trackIdSignature", "duration", "distance", "date", "minSpeed", "maxSpeed", "avgSpeed", "climb", "calories", "exercise_type", "track_name", "trackInterval"]
 
+# data/cardiotrainer/tracks/<trackId>.json
+# data/cardiotrainer/marks.yml
+
+# marks.yml contains:
+# ---
+# timestamp: 2014-06-18T22:33:14   (date of last-fetched piece of data)
+# track: <trackId>                 (id of last-fetched track)
+
 
 # TODO: implement
-# - look in output directory for marker file of last download
+# - look in data directory for marker file of last download
 # - log in, scrape tracks off page
 # - parse tracks, storing by unique id
 # - keep note of most recent track date
 # - continue loading tracks with offset until hitting date mark
 # - write new date mark (and associated unique id) to marker file
+
+marks_file = File.join($options[:data_dir], 'marks.yml')
+tracks_dir = File.join($options[:data_dir], 'tracks')
+Dir.mkdir(tracks_dir) unless File.directory? tracks_dir
+
+last_timestamp = nil
+last_track = nil
+
+if File.exist? marks_file
+  marks = File.open(marks_file) {|f| YAML.load(f) }
+  last_timestamp = marks["timestamp"]
+  last_track = marks["track"]
+end
+
+puts "Scraping until #{last_timestamp} from track #{last_track}"
