@@ -11,6 +11,7 @@
 require 'json'
 require 'mechanize'
 require 'optparse'
+require 'time'
 require 'yaml'
 
 
@@ -25,6 +26,9 @@ $options = {
   config_file: nil,
   data_dir: nil,
 }
+
+# TODO: 'ignore-mark' option to force-fetch all data
+# TODO: 'rebuild-mark' to read existing data
 
 opts = OptionParser.new do |opts|
   opts.banner = "Usage: #{File.basename($0)} [options] <config file> <data dir>"
@@ -50,6 +54,7 @@ $options[:config_file] = ARGV.shift
 $options[:data_dir] = ARGV.shift
 
 fail opts unless ARGV.empty?
+fail "Data directory #{$options[:data_dir]} does not exist!" unless File.directory? $options[:data_dir]
 
 $config = File.open($options[:config_file]) {|file| YAML.load(file) }
 fail "No access code found in config file #{$options[:config_file]}" unless $config["access_code"]
@@ -71,12 +76,15 @@ def login(access_code)
   access = access_code[0..3]
   code   = access_code[4..7]
 
+  log "Logging into Cardiotrainer tracks page"
+
   $agent.post(TRACKS_URL, {access: access, code: code})
 end
 
 
 # Loads the tracks page with some offset. Returns the resulting page.
 def load_tracks(offset=0)
+  log "Fetching tracks at offset #{offset}"
   $agent.get(TRACKS_URL, {offset: offset})
 end
 
@@ -85,48 +93,107 @@ end
 def scrape_tracks(page)
   scripts = page.search("/html/head/script[not(@src)]/text()").map(&:to_s)
   tracks_js = scripts.find {|s| /^\s*var trackData =/ === s }
-  tracks_json = tracks_js[tracks_js.index('{')..tracks_js.rindex('}')]
-  JSON.parse(tracks_json)
+  if tracks_js
+    tracks_json = tracks_js[tracks_js.index('{')..tracks_js.rindex('}')]
+    JSON.parse(tracks_json)
+  end
 end
 
 
 
 ##### PROCESSING #####
 
-# Track JSON data looks like this:
-# tracks = {"773581901" => {...}, "773209895" => {...}, ...}
-#
-# Keys in a track map:
-# ["trackIdSignature", "duration", "distance", "date", "minSpeed", "maxSpeed", "avgSpeed", "climb", "calories", "exercise_type", "track_name", "trackInterval"]
-
 # data/cardiotrainer/tracks/<trackId>.json
 # data/cardiotrainer/marks.yml
 
 # marks.yml contains:
 # ---
-# timestamp: 2014-06-18T22:33:14   (date of last-fetched piece of data)
-# track: <trackId>                 (id of last-fetched track)
-
-
-# TODO: implement
-# - look in data directory for marker file of last download
-# - log in, scrape tracks off page
-# - parse tracks, storing by unique id
-# - keep note of most recent track date
-# - continue loading tracks with offset until hitting date mark
-# - write new date mark (and associated unique id) to marker file
+# timestamp: 2014-06-18 22:33:14 UTC  (date of last-fetched piece of data)
+# track: <trackId>                    (id of last-fetched track)
 
 marks_file = File.join($options[:data_dir], 'marks.yml')
 tracks_dir = File.join($options[:data_dir], 'tracks')
 Dir.mkdir(tracks_dir) unless File.directory? tracks_dir
 
-last_timestamp = nil
-last_track = nil
+mark_timestamp = nil
+mark_track = nil
 
 if File.exist? marks_file
   marks = File.open(marks_file) {|f| YAML.load(f) }
-  last_timestamp = marks["timestamp"]
-  last_track = marks["track"]
+  mark_timestamp = Time.parse(marks["timestamp"])
+  mark_track = marks["track"]
 end
 
-puts "Scraping until #{last_timestamp} from track #{last_track}"
+if mark_timestamp || mark_track
+  puts "Scraping until #{mark_timestamp} from track #{mark_track}"
+else
+  puts "Scraping all track data (no marks found)"
+end
+
+last_timestamp = nil
+last_track = nil
+
+page = login $config["access_code"]
+offset = 0
+
+while last_timestamp.nil? || mark_timestamp.nil? || last_timestamp >= mark_timestamp
+  tracks = scrape_tracks page
+
+  if tracks.nil? || tracks.empty?
+    log "No more tracks available"
+    break
+  else
+    log "Processing #{tracks.count} tracks"
+  end
+
+  # Track JSON data looks like this:
+  # tracks = {"773581901" => {...}, "773209895" => {...}, ...}
+  tracks.each do |id, track|
+    # Track structure:
+    # {
+    #   "trackIdSignature" => "ebd43dc2f4a55d4c9a455de848fd178ae82363d0",
+    #   "duration" => "00:27:50",
+    #   "distance" => 4.09,
+    #   "date" => "Monday<br/>Jun.16, 2014<br/>02:52 pm",
+    #   "minSpeed" => 0,
+    #   "maxSpeed" => 14.66,
+    #   "avgSpeed" => 8.82,
+    #   "climb" => 165.05,
+    #   "calories" => 273,
+    #   "exercise_type" => "exercise_type_walking",
+    #   "track_name" => nil,
+    #   "trackInterval" => "47.605484999999994,-122.33734199999999,13.0,47.605543,-122.33739,8.0,...",
+    # }
+
+    track_time = Time.parse(track["date"]).utc
+    if last_timestamp.nil? || last_timestamp < track_time
+      last_timestamp = track_time
+      last_track = id
+    end
+
+    track_path = File.join(tracks_dir, "#{id}.json")
+    if File.exist? track_path
+      log "Already downloaded track #{id}, skipping..."
+    else
+      File.open(track_path, 'w') do |file|
+        file.write(JSON.dump(track))
+      end
+    end
+  end
+
+  delay = 10.0*rand
+  log "Sleeping for #{delay} seconds"
+  sleep delay
+
+  offset += tracks.count
+  page = load_tracks offset
+end
+
+# Write marks file.
+File.open(marks_file, 'w') do |file|
+  marks = {
+    "timestamp" => last_timestamp,
+    "track" => last_track,
+  }
+  file.write(YAML.dump(marks))
+end
