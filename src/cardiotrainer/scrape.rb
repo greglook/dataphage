@@ -149,22 +149,6 @@ while last_timestamp.nil? || mark_timestamp.nil? || last_timestamp >= mark_times
   # Track JSON data looks like this:
   # tracks = {"773581901" => {...}, "773209895" => {...}, ...}
   tracks.each do |id, track|
-    # Track structure:
-    # {
-    #   "trackIdSignature" => "ebd43dc2f4a55d4c9a455de848fd178ae82363d0",
-    #   "duration" => "00:27:50",
-    #   "distance" => 4.09,
-    #   "date" => "Monday<br/>Jun.16, 2014<br/>02:52 pm",
-    #   "minSpeed" => 0,
-    #   "maxSpeed" => 14.66,
-    #   "avgSpeed" => 8.82,
-    #   "climb" => 165.05,
-    #   "calories" => 273,
-    #   "exercise_type" => "exercise_type_walking",
-    #   "track_name" => nil,
-    #   "trackInterval" => "47.605484999999994,-122.33734199999999,13.0,47.605543,-122.33739,8.0,...",
-    # }
-
     track_time = Time.parse(track["date"]).utc
     if last_timestamp.nil? || last_timestamp < track_time
       last_timestamp = track_time
