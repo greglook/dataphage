@@ -22,15 +22,18 @@
 # {:vault.entity/source-id "ebd43dc2f4a55d4c9a455de848fd178ae82363d0"
 #  :time/at #inst "2014-06-16T14:52:00-0700"
 #  :time/duration #phys/q [1670 s]
-#  :exercise/type :exercise.type/walking
+#  :exercise/type :exercise.type/running
 #  :exercise/calories 273
-#  :distance #phys/q [4.09 km]
-#  :geo.track/min-speed #phys/q [0.0 {* 5/18 m 1 s -1}]
-#  :geo.track/avg-speed #phys/q [8.82 {* 5/18 m 1 s -1}]
-#  :geo.track/max-speed #phys/q [14.66 {* 5/18 m 1 s -1}]
+#  :exercise/distance #phys/q [4.09 km]
+#  :geo.track/min-speed #phys/q [0.0 kph]
+#  :geo.track/avg-speed #phys/q [8.82 kph]
+#  :geo.track/max-speed #phys/q [14.66 kph]
 #  :geo.track/climb #phys/q [165.05 m]
-#  :geo/track
-#  #geo/track
+#  :geo/track #vault/ref "sha256:..."}
+#
+# Track blob:
+# {:vault/type :geo/track
+#  :track #geo/coordinates
 #  [[47.605484999999994 -122.33734199999999 13.0]
 #   [47.605543 -122.33739 8.0]
 #   ...]}
