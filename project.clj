@@ -15,4 +15,9 @@
 
   :profiles
   {:repl {:source-paths ["dev"]
-          :dependencies [[org.clojure/tools.namespace "0.2.8"]]}})
+          :dependencies [[org.clojure/tools.namespace "0.2.8"]]
+          :jvm-opts ["-DLOGBACK_APPENDER=repl"
+                     "-DAPP_LOG_LEVEL=DEBUG"]}
+
+   :test {:jvm-opts ["-DLOGBACK_APPENDER=nop"
+                     "-DAPP_LOG_LEVEL=TRACE"]}})
