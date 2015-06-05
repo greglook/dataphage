@@ -1,2 +1,15 @@
-/cfg
-/data
+/target
+/lib
+/classes
+/checkouts
+/dev/var
+pom.xml
+pom.xml.asc
+*.jar
+*.class
+.lein-deps-sum
+.lein-env
+.lein-failures
+.lein-plugins
+.lein-repl-history
+.nrepl-port
