@@ -10,6 +10,27 @@ This project will consist of a few separate pieces:
 - scripts for pulling data from external data sources
 - a script to process file data and populate Vault
 
+## Terminology
+
+A _source_ is an entity which holds some original data. Typically, each website
+or application will be its own source of data. For example, GMail, Github,
+Withings, CardioTrainer, etc are all sources. Each source may have many
+_topics_, which represent a specific kind of data. For example, scale readings
+for a specific person would be a topic in Withings; run tracks in CardioTrainer
+would be another.
+
+Each source has some general configuration (e.g., access credentials) and a list
+of registered topics. Each topic can have configuration as well, for example to
+specify names, qualifiers, etc.
+
+For each topic, the system keeps track of a set of time ranges indicating what
+periods have been retrieved from the source for that topic. This is the topic's
+_coverage_. By default, the system shouldn't re-fetch data for a topic unless
+the user explicitly requests it.
+
+When topics fetch data, it results in _raw records_. These are keyed by the
+primary identifier in the source, which aids in further deduplication.
+
 ## Processing Steps
 
 Data follows an _ingestion_ procedure, by which is integrated into the existing
