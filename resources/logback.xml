@@ -18,6 +18,6 @@
     <appender-ref ref="${LOGBACK_APPENDER:-stdout}"/>
   </root>
 
-  <logger name="dataphage" level="${APP_LOG_LEVEL:-INFO}"/>
+  <logger name="archiva" level="${APP_LOG_LEVEL:-INFO}"/>
   <logger name="org.eclipse.jetty" level="INFO"/>
 </configuration>

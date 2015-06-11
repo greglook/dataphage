@@ -1,4 +1,4 @@
-(defproject mvxcvi/dataphage "0.1.0-SNAPSHOT"
+(defproject mvxcvi/archiva "0.1.0-SNAPSHOT"
   :description "A library for ingesting data from third-party sources."
   :url "https://github.com/greglook/dataphage"
   :license {:name "Public Domain"

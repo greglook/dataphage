@@ -1,10 +1,8 @@
-(ns dataphage.main
-  "Main entry-point for launching the service."
-  (:gen-class)
+(ns archiva.core
+  "System configuration and setup."
   (:require
     [clojure.tools.logging :as log]
-    [com.stuartsierra.component :as component]
-    [environ.core :refer [env]]))
+    [com.stuartsierra.component :as component]))
 
 
 ;; ## System Lifecycle
@@ -19,6 +17,13 @@
     (constantly
       (component/system-map)))
   :init)
+
+
+(defn configure!
+  "Alters the system by loading configuration files."
+  []
+  ; TODO: load configuration
+  :configure)
 
 
 (defn start!
@@ -37,12 +42,3 @@
     (log/info "Stopping dataphage system...")
     (alter-var-root #'system component/stop))
   :stop)
-
-
-(defn -main []
-  (init!)
-  (.addShutdownHook
-    (Runtime/getRuntime)
-    (Thread. ^Runnable stop! "system shutdown hook"))
-  (start!)
-  (log/info "System started, entering active mode..."))

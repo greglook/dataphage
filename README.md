@@ -1,5 +1,5 @@
-Dataphage
-=========
+Archiva
+=======
 
 This project contains scripts to periodically fetch personal data from a variety
 of sources and convert it into a unified format.

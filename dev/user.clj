@@ -1,5 +1,6 @@
 (ns user
   (:require
+    [archiva.core :as core :refer [system init! start! stop!]]
     (clj-time
       [coerce :as coerce-time]
       [core :as time]
@@ -10,7 +11,6 @@
     [clojure.string :as str]
     [clojure.tools.namespace.repl :refer [refresh]]
     [com.stuartsierra.component :as component]
-    [dataphage.main :as main :refer [system init! start! stop!]]
     [environ.core :refer [env]]))
 
 
