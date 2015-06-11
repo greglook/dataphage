@@ -1,6 +1,8 @@
 (ns user
   (:require
-    [archiva.core :as core :refer [system init! start! stop!]]
+    (archiva
+      [core :as core :refer [system start! stop!]]
+      [main :as main :refer [init! configure!]])
     (clj-time
       [coerce :as coerce-time]
       [core :as time]
@@ -18,6 +20,7 @@
   "Initializes and starts the system."
   []
   (init!)
+  (configure!)
   (start!))
 
 
