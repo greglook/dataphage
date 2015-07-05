@@ -6,9 +6,12 @@
 
   :dependencies
   [[ch.qos.logback/logback-classic "1.1.2"]
+   [clj-http "1.1.2"]
+   [clj-oauth "1.5.2"]
    [clj-time "0.9.0"]
    [com.stuartsierra/component "0.2.2"]
    [environ "1.0.0"]
+   [mvxcvi/withings-clj "SNAPSHOT"]
    [org.clojure/clojure "1.7.0-RC1"]
    [org.clojure/tools.logging "0.3.1"]
    [prismatic/schema "0.4.2"]]
