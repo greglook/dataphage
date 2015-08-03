@@ -1,4 +1,4 @@
-(ns archiva.sources.withings
+(ns archiva.source.withings
   "Source scrapers for Withings data. Follow the Oauth setup instructions in
   the Withings API docs.
 
@@ -28,7 +28,7 @@
 ; - return updated state and data index
 
 
-
+#_
 (defrecord WithingsDataSource
   [data-dir client opts]
 
@@ -36,7 +36,7 @@
 
   )
 
-
+#_
 (defn data-source
   "Constructs a new Withings data source component."
   [data-dir client & {:as opts}]

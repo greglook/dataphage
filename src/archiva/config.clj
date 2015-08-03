@@ -32,6 +32,6 @@
 (defn defsource
   "Registers a data-source component in the system map."
   ([k src]
-   (alter-var-root #'core/system assoc k v))
+   (alter-var-root #'core/system assoc k src))
   ([k src deps]
    (defsource k (component/using src deps))))
