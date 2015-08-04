@@ -1,7 +1,7 @@
 (ns archiva.log.memory
   "Memory-backed data log."
   (:require
-    [archiva.log :as log]))
+    [archiva.log.core :as log]))
 
 
 (defrecord MemoryDataLog
@@ -22,14 +22,15 @@
   (read-entries
     [this topic start batch]
     (if-let [entries (get @storage topic)]
-      (take batch (drop start entries))
+      (log/select-range entries start batch)
       (throw (IllegalStateException. (str "Log does not contain topic " topic)))))
 
 
   (publish!
-    [this topic entry]
-    (let [new-mem (swap! storage update-in [topic] conj entry)]
-      (count (get new-mem topic)))))
+    [this topic value]
+    (let [entry (log/->entry topic value)
+          new-mem (swap! storage update-in [topic] conj entry)]
+      (assoc entry :seq (count (get new-mem topic))))))
 
 
 (defn memory-log
