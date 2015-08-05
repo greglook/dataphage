@@ -25,21 +25,17 @@
 
 
 (defn ->entry
-  "Creates a new log entry for a value in the given topic. The returned map will
-  _not_ contain an `:id`."
-  [topic value]
-  {:topic topic
+  "Creates a new log entry for the given value. The returned map will _not_
+  contain a topic name or sequence offset."
+  [value]
+  {:id (java.util.UUID/randomUUID)
    :time (java.util.Date.)
-   :id (java.util.UUID/randomUUID)
    :value value})
 
 
-(defn select-range
-  "Helper function to select a range of entries. Returned values will contain
-  a `:seq` key giving their index into the sequence."
-  [entries start batch]
-  (some->>
-    (seq entries)
-    (map #(assoc %2 :seq %1) (range))
-    (drop start)
-    (take batch)))
+(defn update-entries
+  "Updates a sequence of entries by associating a `:topic` and `:seq` number."
+  [topic entries]
+  (map #(assoc %2 :topic topic :seq %1)
+       (range)
+       entries))

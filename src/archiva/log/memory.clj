@@ -11,7 +11,8 @@
 
   (create-topic
     [this topic]
-    (swap! storage update-in [topic] #(or % [])))
+    (swap! storage update-in [topic] #(or % []))
+    nil)
 
 
   (list-topics
@@ -22,15 +23,20 @@
   (read-entries
     [this topic start batch]
     (if-let [entries (get @storage topic)]
-      (log/select-range entries start batch)
+      (->> entries
+          (log/update-entries topic)
+          (drop start)
+          (take batch))
       (throw (IllegalStateException. (str "Log does not contain topic " topic)))))
 
 
   (publish!
     [this topic value]
-    (let [entry (log/->entry topic value)
+    (let [entry (log/->entry value)
           new-mem (swap! storage update-in [topic] conj entry)]
-      (assoc entry :seq (count (get new-mem topic))))))
+      (->> (get new-mem topic)
+           (log/update-entries topic)
+           (last)))))
 
 
 (defn memory-log
