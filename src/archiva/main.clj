@@ -34,6 +34,6 @@
   (init!)
   (.addShutdownHook
     (Runtime/getRuntime)
-    (Thread. ^Runnable core/stop! "system shutdown hook"))
+    (Thread. ^Runnable core/stop! "System Shutdown Hook"))
   (core/start!)
   (log/info "System started, entering active mode..."))

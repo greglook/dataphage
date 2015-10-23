@@ -21,7 +21,7 @@
   files with names ending in `.clj` within it will be loaded recursively."
   [path]
   (let [file (io/file path)]
-    (binding [*ns* (find-ns 'dataphage.config)]
+    (binding [*ns* (find-ns 'archiva.config)]
       (if (.isDirectory file)
         (doseq [f (file-seq file)]
           (when (clj-file? f)
