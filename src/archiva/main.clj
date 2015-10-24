@@ -22,11 +22,10 @@
 
 (defn configure!
   "Updates the system by loading configuration files."
-  []
+  [config]
   (when-not core/system
     (throw (IllegalStateException. "The system is not initialized")))
-  ; TODO: load configuration files
-  #_ (alter-var-root #'core/system ...)
+  (config/load-config config)
   :configure)
 
 
