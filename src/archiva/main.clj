@@ -16,7 +16,7 @@
   (alter-var-root #'core/system
     (constantly
       (component/system-map
-        #_ ...)))
+        :sources #{})))
   :init)
 
 
