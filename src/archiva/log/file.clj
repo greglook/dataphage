@@ -25,9 +25,9 @@
 
 
 (defn- read-edn-values
-  [^File file]
+  [data-readers ^File file]
   (with-open [in (java.io.PushbackReader. (io/reader file))]
-    (->> (repeatedly #(edn/read {:eof ::end} in))
+    (->> (repeatedly #(edn/read {:eof ::end, :data-readers data-readers} in))
          (take-while (partial not= ::end))
          (doall))))
 
@@ -36,7 +36,7 @@
 ;;
 ;; <root>/<topic>.edn
 (defrecord FileDataLog
-  [^File root]
+  [^File root data-readers]
 
   log/DataLog
 
@@ -62,7 +62,8 @@
     (locking root
       (let [file (topic->file root topic)]
         (if (.exists file)
-          (->> (read-edn-values file)
+          (->> file
+               (read-edn-values data-readers)
                (log/update-entries topic)
                (drop start)
                (take batch))
@@ -79,7 +80,8 @@
             (with-open [out (io/writer file :append true)]
               (.write out (prn-str entry))
               (.flush out))
-            (->> (read-edn-values file)
+            (->> file
+                 (read-edn-values data-readers)
                  (log/update-entries topic)
                  (last)))
           (throw (IllegalStateException.
@@ -88,5 +90,5 @@
 
 (defn file-log
   "Constructs a new file-backed data log."
-  [root]
-  (FileDataLog. (io/file root)))
+  [root & {:keys [data-readers]}]
+  (FileDataLog. (io/file root) data-readers))
