@@ -9,17 +9,16 @@
   (let [target (time/interval (time/date-time 2015 1  1)
                               (time/date-time 2015 1 10))]
     (testing "no coverage or limit"
-      (let [goals (utils/coverage-gaps target [] nil)]
+      (let [goals (utils/coverage-gaps target nil [])]
         (is (sequential? goals))
         (is (= 1 (count goals)))
         (is (= target (first goals)))))
     (testing "partial coverage, no limit"
       (let [goals (utils/coverage-gaps
-                    target
+                    target nil
                     [(time/interval (time/date-time 2015 1 2) (time/date-time 2015 1 4))
-                     (time/interval (time/date-time 2015 1 3) (time/date-time 2015 1 6))
-                     (time/interval (time/date-time 2015 1 8) (time/date-time 2015 1 9))]
-                    nil)]
+                     (time/interval (time/date-time 2015 1 8) (time/date-time 2015 1 9))
+                     (time/interval (time/date-time 2015 1 3) (time/date-time 2015 1 6))])]
         (is (= 3 (count goals)))
         (is (= [(time/interval (time/date-time 2015 1 1) (time/date-time 2015 1 2))
                 (time/interval (time/date-time 2015 1 6) (time/date-time 2015 1 8))
@@ -27,9 +26,8 @@
                goals))))
     (testing "partial coverage, limit period"
       (let [goals (utils/coverage-gaps
-                    target
-                    [(time/interval (time/date-time 2015 1 3) (time/date-time 2015 1 8))]
-                    (time/days 1))]
+                    target (time/days 1)
+                    [(time/interval (time/date-time 2015 1 3) (time/date-time 2015 1 8))])]
         (is (= 4 (count goals)))
         (is (= [(time/interval (time/date-time 2015 1 1) (time/date-time 2015 1 2))
                 (time/interval (time/date-time 2015 1 2) (time/date-time 2015 1 3))
