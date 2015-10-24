@@ -1,9 +1,11 @@
 (ns archiva.core-test
   (:require
     (archiva.log
+      [blob :refer [blob-log]]
       [core :as log]
       [memory :refer [memory-log]]
       [file :refer [file-log]])
+    [blobble.store.memory :refer [memory-store]]
     [clojure.java.io :as io]
     [clojure.test :refer :all]))
 
@@ -28,16 +30,15 @@
         (is (instance? java.util.UUID (:id entry)))
         (is (instance? java.util.Date (:time entry)))
         (is (= topic (:topic entry)))
-        (is (= :foo (:value entry)))
-        (is (zero? (:seq entry)))
-        )
+        (is (some? (:value entry)))
+        (is (zero? (:seq entry))))
       (let [[entry :as entries] (log/read-entries log topic 0 5)]
         (is (= 1 (count entries))
             "Topic contains a single entry")
         (is (instance? java.util.UUID (:id entry)))
         (is (instance? java.util.Date (:time entry)))
         (is (= topic (:topic entry)))
-        (is (= :foo (:value entry)))
+        (is (some? (:value entry)))
         (is (zero? (:seq entry)))))))
 
 
@@ -57,3 +58,8 @@
     (test-data-log subject "file-log")
     ; TODO: remove tmpdir
     ))
+
+
+(deftest test-memory-blob-log
+  (let [subject (blob-log (memory-log) (memory-store))]
+    (test-data-log subject "memory-blob-log")))

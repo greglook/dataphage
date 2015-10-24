@@ -5,7 +5,8 @@
             :url "http://unlicense.org/"}
 
   :dependencies
-  [[byte-streams "0.2.0"]
+  [[mvxcvi/blobble "0.1.0-SNAPSHOT"]
+   [byte-streams "0.2.0"]
    [ch.qos.logback/logback-classic "1.1.3"]
    [clj-http "2.0.0"]
    [clj-time "0.11.0"]
