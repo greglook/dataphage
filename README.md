@@ -32,9 +32,16 @@ explicitly requests it.
 /archiva/
   sources/
     withings/
-      weight/
+      jobs/
         2015/...
-      <topic>/
+          410824-funny-dog/ -> job meta
+            <topic> -> [raw-record-link]
+            <topic> -> [raw-record-link]
+            ...
+      topics/
+        weight/
+          2015/... -> [raw-record-link]
+        <topic>/...
         ...
     <source>/...
 ```
