@@ -10,8 +10,8 @@
   extraction is defined as a _job_ with some configuration parameters. Common
   job parameters include:
 
-  - `after`  Fetch records occurring at or after this time.
-  - `before` Fetch records occurring at or before this time.
+  - `after`  Only fetch data occurring at or after this time.
+  - `before` Only fetch data occurring at or before this time.
 
   The workflow is as follows:
 

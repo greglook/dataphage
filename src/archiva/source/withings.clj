@@ -4,9 +4,11 @@
 
   See: http://oauth.withings.com/api"
   (:require
+    [archiva.log.core :as dlog]
     [archiva.source.core :as source]
     [clj-time.core :as time]
-    [clojure.tools.logging :as log]))
+    [clojure.tools.logging :as log]
+    [mvxcvi.withings :as withings]))
 
 
 ; set up config:
@@ -18,14 +20,13 @@
 
 ; choose a region to parse
 ; - return nil if everything is already covered
-; - otherwise return a _single_ job config (typically, "start at offset 0")
+; - otherwise return a single job config for each topic
 
 ; execute a scraping job
 ; - takes some config (offset, time windows?)
 ; - return updated state and data index
 
 
-; /home/greg/data/source-data/blobs/sha2-256/...
 ; /home/greg/data/source-data/withings/
 ;   jobs.edn -> <multihash>
 ;               <multihash>
@@ -54,21 +55,25 @@
 
   (begin-session!
     [this]
+    ; TODO: use `user-info` to verify credentials
     nil)
 
 
   (select-jobs
     [this session]
+    ; TODO: check enabled topics to pull, generate target intervals and goals
     nil)
 
 
   (extract!
     [this session job]
+    ; TODO: use the client to fetch each batch of data, save it to the log
     nil)
 
 
   (end-session
     [this session]
+    ; no-op
     nil))
 
 
