@@ -1,10 +1,11 @@
-(ns archiva.core-test
+(ns archiva.log-test
   (:require
     (archiva.log
       [blob :refer [blob-log]]
       [core :as log]
       [memory :refer [memory-log]]
       [file :refer [file-log]])
+    [blobble.store.file :refer [file-store]]
     [blobble.store.memory :refer [memory-store]]
     [clojure.java.io :as io]
     [clojure.test :refer :all]))
