@@ -25,23 +25,37 @@ specify names, qualifiers, etc.
 
 For each topic, the system keeps track of a set of time ranges indicating what
 periods have been retrieved from the source for that topic. This is the topic's
-_coverage_. By default, the system shouldn't re-fetch data for a topic unless
-the user explicitly requests it.
+_coverage_. The system shouldn't re-fetch data for a period unless the user
+explicitly requests it.
 
-When topics fetch data, it results in _raw records_. These are keyed by the
-primary identifier in the source, which aids in further deduplication.
+```
+/archiva/
+  sources/
+    withings/
+      jobs/
+        2015/...
+          410824-funny-dog/ -> job meta
+            <topic> -> [raw-record-link]
+            <topic> -> [raw-record-link]
+            ...
+      topics/
+        weight/
+          2015/... -> [raw-record-link]
+        <topic>/...
+        ...
+    <source>/...
+```
 
 ## Processing Steps
 
-Data follows an _ingestion_ procedure, by which is integrated into the existing
-data web.
+Data follows an _ingestion_ procedure, by which it is integrated into the
+existing data web.
 
 ### Collection
 
-The first step is to collect raw data from a source. This is probably best left
-to a manual process to begin with. Ultimately, the goal is obviously to automate
-data collection with scripts. In many cases, collecting the data involves
-interacting with or scraping web pages.
+When the system fetches data, the results are _raw records_. These are keyed by
+the _source's_ primary identifier, which aids in deduplication. The raw results
+are stored as blocks and linked from a job-level entry.
 
 There are two primary usage styles for data collection: complete and
 incremental. The first is just as it sounds, downloading all available data in
@@ -51,44 +65,55 @@ gather only "new" data to integrate.
 
 ### Conversion
 
-Next, the data needs to be converted into a common format - this is probably an
-EDN value or set of values that are candidates for insertion into Vault.  For
-example, take this line from a Charles Schwab CSV file:
+Next, the data needs to be converted into a common format - this is probably EDN
+or set of values that are candidates for insertion into Vault. For example, take
+this line from a Schwab CSV file:
 
 ```csv
 "10/08/2013","Rev Reinvest Shares","SCHZ","SCH US AGG BND ETF","1.0423","$50.7643","","-$52.91",
 ```
 
-It becomes the following candidate posting values:
+The entire CSV (or perhaps a subsection of it, e.g. by month) is stored as a
+block. Each line is then translated using the CSV headers into records like the
+following:
 
 ```clojure
-{:vault/type :ledger/posting
- :ledger/account #vault/ref "sha256:blobref" ; Individual Investments
- :ledger/amount #finance/commodity [1.0423 SCHZ]
- :price #finance/commodity [50.7643 USD]
- :data/source #vault/ref "sha256:blobref"    ; csv line blob
- :time/at #inst "2013-10-08T00:00:00Z"}
-
-{:vault/type :ledger/posting
- :ledger/account #vault/ref "sha256:blobref" ; Individual Investments
- :ledger/amount #finance/commodity [USD -52.91]
- :data/source #vault/ref "sha256:blobref"    ; csv line blob
- :time/at #inst "2013-10-08T00:00:00Z"}
+{:data/sources #{#data/link "source-csv-file"}
+ :date "10/08/2013"
+ :description "Rev Reinvest Shares"
+ :commodity "SCHZ"
+ :title "SCH US AGG BND ETF"
+ :amount 1.0423M
+ :price 50.7643M
+ :fees nil
+ :total -52.91M}
 ```
 
-And this candidate transaction value:
+Finally, this is processed into the following candidate values:
 
 ```clojure
-{:vault/type :ledger/transaction
- :ledger/postings
- #{#vault/ref "algo:blobref"
-   #vault/ref "algo:blobref"}
- :time/at #inst "2013-10-08T00:00:00Z"}
+{:data/type :finance/posting
+ :data/sources #{#data/link "source-map"}
+ :finance.posting/date #time/date "2013-10-08"
+ :finance.posting/account #data/link "individual-investments"
+ :finance.posting/amount #finance/$ [1.0423M SCHZ]
+ :finance.posting/price #finance/$ [50.7643M USD]
+ :finance.posting/weight #finance/$ [52.91M USD]}
 
-; entity
-{:title "Dividend Reinvestment"
- :description nil
- :state nil}
+{:data/type :finance/posting
+ :data/sources #{#data/link "source-map"}
+ :finance.posting/date #time/date "2013-10-08"
+ :finance.posting/account #data/link "individual-investments"
+ :finance.posting/amount #finance/$ [-52.91M USD]}
+
+{:data/type :finance/transaction
+ :time/date #time/date "2013-10-08"
+ :title "SCH US AGG BND ETF"
+ :description "Rev Reinvest Shares"
+ :finance.transaction/id
+ :finance.transaction/status :finance.transaction.status/uncleared
+ :finance.transaction/entries [#data/link "posting-01"
+                               #data/link "posting-02"]}
 ```
 
 ### Merging
