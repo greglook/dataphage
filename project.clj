@@ -5,20 +5,24 @@
             :url "http://unlicense.org/"}
 
   :dependencies
-  [[mvxcvi/blobble "0.1.0-SNAPSHOT"]
-   [byte-streams "0.2.0"]
-   [ch.qos.logback/logback-classic "1.1.3"]
-   [clj-http "2.0.0"]
-   [clj-time "0.11.0"]
-   [compojure "1.4.0"]
-   [com.stuartsierra/component "0.3.0"]
-   [environ "1.0.1"]
-   [mvxcvi/withings-clj "0.3.0"]
-   [org.clojure/clojure "1.7.0"]
+  [[org.clojure/clojure "1.8.0"]
    [org.clojure/tools.logging "0.3.1"]
-   [prismatic/schema "1.0.1"]
-   [ring/ring-core "1.4.0"]
-   [ring/ring-jetty-adapter "1.4.0"]]
+
+   [byte-streams "0.2.2"]
+   [ch.qos.logback/logback-classic "1.1.7"]
+   [clj-http "3.3.0"]
+   [clj-time "0.12.2"]
+   [com.stuartsierra/component "0.3.1"]
+   [environ "1.1.0"]
+   [mvxcvi/blocks "0.8.0"]
+   [mvxcvi/withings-clj "0.3.0"]
+   [prismatic/schema "1.1.3"]
+
+   [org.seleniumhq.selenium/selenium-java "3.0.1"]
+   [com.codeborne/phantomjsdriver "1.3.0"
+    :exclusions [org.seleniumhq.selenium/selenium-java
+                 org.seleniumhq.selenium/selenium-server
+                 org.seleniumhq.selenium/selenium-remote-driver]]]
 
   :profiles
   {:repl {:source-paths ["dev"]
