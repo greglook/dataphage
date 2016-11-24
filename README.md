@@ -23,27 +23,29 @@ Each source has some general configuration (e.g., access credentials) and a list
 of registered topics. Each topic can have configuration as well, for example to
 specify names, qualifiers, etc.
 
-For each topic, the system keeps track of a set of time ranges indicating what
-periods have been retrieved from the source for that topic. This is the topic's
-_coverage_. The system shouldn't re-fetch data for a period unless the user
-explicitly requests it.
+Within a topic, data is contained in _records_, which are grouped into
+_segments_. Each segment has a unique label and specifies the time interval
+it covers.
 
 ```
 /archiva/
   sources/
     withings/
       jobs/
-        2015/...
-          410824-funny-dog/ -> job meta
-            <topic> -> [raw-record-link]
-            <topic> -> [raw-record-link]
+        2016/
+          2016-11-23-08425-aQ832x/ -> job meta
+            <topic> -> [segment-link]
+            <topic> -> [segment-link]
             ...
       topics/
         weight/
-          2015/... -> [raw-record-link]
+          2016/
+            <segment-id> -> [record]
         <topic>/...
         ...
     <source>/...
+  pending/
+    0 -> ...
 ```
 
 ## Processing Steps
