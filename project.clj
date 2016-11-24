@@ -18,7 +18,8 @@
    [mvxcvi/withings-clj "0.3.0"]
    [prismatic/schema "1.1.3"]
 
-   [org.seleniumhq.selenium/selenium-java "3.0.1"]
+   [clj-webdriver "0.7.2"]
+   [org.seleniumhq.selenium/selenium-java "2.47.0"]
    [com.codeborne/phantomjsdriver "1.3.0"
     :exclusions [org.seleniumhq.selenium/selenium-java
                  org.seleniumhq.selenium/selenium-server
