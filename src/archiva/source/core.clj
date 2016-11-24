@@ -10,14 +10,6 @@
   extraction is defined by a collection of _segments_ with some configuration
   parameters."
 
-  (open-session!
-    [source]
-    "Begin a new session of data collection for this source.")
-
-  (close-session!
-    [source session]
-    "Close a session after completing data collection.")
-
   (plan-segments
     [source topic interval]
     "Selects parameters for the segments in `topic` which overlap `interval`.
@@ -30,6 +22,14 @@
 
     Segments _may_ contain extra data to convey parameters to the extraction
     function.")
+
+  (open-session!
+    [source]
+    "Begin a new session of data collection for this source.")
+
+  (close-session!
+    [source session]
+    "Close a session after completing data collection.")
 
   (extract!
     [source session plans]
