@@ -53,6 +53,23 @@
 
   source/DataSource
 
+  (plan-segments
+    [this topic interval]
+    (let [start (time/start interval)
+          end (time/end interval)
+          day-start (time/date-time (time/year start)
+                                    (time/month start)
+                                    (time/day start))]
+      (->>
+        (periodic/periodic-seq day-start (time/days 1))
+        (partition 2 1)
+        (take-while #(time/before? (first %) end))
+        (mapv (fn ->plan
+                [[seg-start seg-end]]
+                {:id (ftime/format ...)
+                 :topic topic
+                 :interval (time/interval seg-start seg-end)})))))
+
   (open-session!
     [this]
     ; TODO: use `user-info` to verify credentials
@@ -63,13 +80,8 @@
     ; no-op
     nil)
 
-  (plan-jobs
-    [this session]
-    ; TODO: check enabled topics to pull, generate target intervals and goals
-    nil)
-
   (extract!
-    [this session job]
+    [this session plans]
     ; TODO: use the client to fetch each batch of data, save it to the log
     nil))
 
