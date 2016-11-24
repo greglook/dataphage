@@ -11,7 +11,7 @@
 
   (create-topic
     [this topic]
-    (swap! storage update-in [topic] #(or % []))
+    (swap! storage update topic #(or % []))
     nil)
 
 
@@ -24,16 +24,18 @@
     [this topic start batch]
     (if-let [entries (get @storage topic)]
       (->> entries
-          (log/update-entries topic)
-          (drop start)
-          (take batch))
+           (log/update-entries topic)
+           (drop start)
+           (take batch))
       (throw (IllegalStateException. (str "Log does not contain topic " topic)))))
 
 
   (publish!
     [this topic value]
+    (when-not (contains? @storage topic)
+      (throw (IllegalStateException. (str "Log does not contain topic " topic))))
     (let [entry (log/->entry value)
-          new-mem (swap! storage update-in [topic] conj entry)]
+          new-mem (swap! storage update topic conj entry)]
       (->> (get new-mem topic)
            (log/update-entries topic)
            (last)))))
