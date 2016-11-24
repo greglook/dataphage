@@ -2,11 +2,11 @@
   "Data log which keeps data stored in a content-addressable blob store and
   places pointers in a wrapped log."
   (:require
-    [blobble.core :as blob]
+    [blocks.core :as block]
     [archiva.log.core :as log]))
 
 
-(defrecord BlobDataLog
+(defrecord BlockDataLog
   [log store]
 
   log/DataLog
@@ -23,23 +23,23 @@
 
   (read-entries
     [this topic start batch]
-    (map #(update-in % [:value] (partial blob/get store))
+    (map #(update-in % [:value] (partial block/get store))
          (log/read-entries log topic start batch)))
 
 
   (publish!
     [this topic value]
-    (let [blob (if (instance? blobble.core.Blob value)
+    (let [block (if (instance? blocks.data.Block value)
                   value
-                  (blob/read! (pr-str value)))
-          blob (blob/put! store blob)]
+                  (block/read! (pr-str value)))
+          block (block/put! store block)]
       (assoc
-        (log/publish! log topic (:id blob))
-        :value blob))))
+        (log/publish! log topic (:id block))
+        :value block))))
 
 
-(defn blob-log
-  "Constructs a new data log backed by the given log and blob store
+(defn block-log
+  "Constructs a new data log backed by the given log and block store
   implementations."
   [log store]
-  (BlobDataLog. log store))
+  (BlockDataLog. log store))
