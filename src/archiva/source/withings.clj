@@ -53,27 +53,24 @@
 
   source/DataSource
 
-  (begin-session!
+  (open-session!
     [this]
     ; TODO: use `user-info` to verify credentials
     nil)
 
+  (close-session!
+    [this session]
+    ; no-op
+    nil)
 
-  (select-jobs
+  (plan-jobs
     [this session]
     ; TODO: check enabled topics to pull, generate target intervals and goals
     nil)
 
-
   (extract!
     [this session job]
     ; TODO: use the client to fetch each batch of data, save it to the log
-    nil)
-
-
-  (end-session
-    [this session]
-    ; no-op
     nil))
 
 
